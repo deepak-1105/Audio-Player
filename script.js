@@ -1,168 +1,150 @@
-const musicContainer = document.getElementById('music-container');
-const playBtn = document.getElementById('play');
-const prevBtn = document.getElementById('prev');
-const nextBtn = document.getElementById('next');
+var x = (function(){
 
-const audio = document.getElementById('audio');
-const progress = document.getElementById('progress');
-const progressContainer = document.getElementById('progress-container');
-const title = document.getElementById('title');
-const cover = document.getElementById('cover');
-const currTime = document.querySelector('#currTime');
-const durTime = document.querySelector('#durTime');
+	//get the stuff
+	var canvas = document.getElementById("canvas");
 
-const songs = ['hey', 'summer', 'ukulele'];
+	var context = canvas.getContext("2d");
 
-let songIndex = 2;
+	canvas.height = window.innerHeight;
+	canvas.width = window.innerWidth;
 
-loadSong(songs[songIndex]);
+	var brush = document.getElementById("bsize");
+	var clear = document.getElementById("clear");
+	var erase = document.getElementById("erase");
+	var shade = document.getElementsByClassName("shade");
+	var n = shade.length;
+    var rect=document.getElementById("rect");
+    var circle = document.getElementById("circle");
+	var inc = document.getElementById("inc");
+	var dec = document.getElementById("dec");
 
+	var maxSize = 60;
+	var minSize = 1;
 
-function loadSong(song) {
-  title.innerText = song;
-  audio.src = `music/${song}.mp3`;
-  cover.src = `images/${song}.jpg`;
-}
+	var size = 1;
+	var current = document.getElementById("bsize");
+	var save = document.getElementById("save");
+    
 
-function playSong() {
-  musicContainer.classList.add('play');
-  playBtn.querySelector('i.fas').classList.remove('fa-play');
-  playBtn.querySelector('i.fas').classList.add('fa-pause');
+    function rectangle(){
+        context.beginPath();
+        context.rect(200, 200, 150, 100);
+        context.stroke();
+    }
+    rect.addEventListener("click", rectangle);
 
-  audio.play();
-}
+    function circl(){
+        context.beginPath();
+        context.arc(500, 500, 50, 0, 2 * Math.PI, false);
+        context.lineWidth = 3;
+        context.strokeStyle = 'black';
+        context.stroke();
+    }
+    circle.addEventListener("click", circl);
+     
+	//increase size
+	function increase(){
 
-function pauseSong() {
-  musicContainer.classList.remove('play');
-  playBtn.querySelector('i.fas').classList.add('fa-play');
-  playBtn.querySelector('i.fas').classList.remove('fa-pause');
+		size += 1;
+        //backgroundColor: green;
+		if(size>maxSize)
+			size = maxSize;
+		else if(size<minSize)
+			size = minSize;
 
-  audio.pause();
-}
-
-
-function prevSong() {
-  songIndex--;
-
-  if (songIndex < 0) {
-    songIndex = songs.length - 1;
-  }
-
-  loadSong(songs[songIndex]);
-
-  playSong();
-}
-
-
-function nextSong() {
-  songIndex++;
-
-  if (songIndex > songs.length - 1) {
-    songIndex = 0;
-  }
-
-  loadSong(songs[songIndex]);
-
-  playSong();
-}
-
-function updateProgress(e) {
-  const { duration, currentTime } = e.srcElement;
-  const progressPercent = (currentTime / duration) * 100;
-  progress.style.width = `${progressPercent}%`;
-}
-function setProgress(e) {
-  const width = this.clientWidth;
-  const clickX = e.offsetX;
-  const duration = audio.duration;
-
-  audio.currentTime = (clickX / width) * duration;
-}
-
-function DurTime (e) {
-	const {duration,currentTime} = e.srcElement;
-	var sec;
-	var sec_d;
-
+		current.innerHTML = size;
+	}
+	inc.addEventListener("click",increase);
 	
-	let min = (currentTime==null)? 0:
-	 Math.floor(currentTime/60);
-	 min = min <10 ? '0'+min:min;
+	//decrease size
+	function decrease(){
 
-	function get_sec (x) {
-		if(Math.floor(x) >= 60){
-			
-			for (var i = 1; i<=60; i++){
-				if(Math.floor(x)>=(60*i) && Math.floor(x)<(60*(i+1))) {
-					sec = Math.floor(x) - (60*i);
-					sec = sec <10 ? '0'+sec:sec;
-				}
-			}
-		}else{
-		 	sec = Math.floor(x);
-		 	sec = sec <10 ? '0'+sec:sec;
-		 }
-	} 
+		size -= 1;
 
-	get_sec (currentTime,sec);
-
-	// change currentTime DOM
-	currTime.innerHTML = min +':'+ sec;
-
-	// define minutes duration
-	let min_d = (isNaN(duration) === true)? '0':
-		Math.floor(duration/60);
-	 min_d = min_d <10 ? '0'+min_d:min_d;
-
-
-	 function get_sec_d (x) {
-		if(Math.floor(x) >= 60){
-			
-			for (var i = 1; i<=60; i++){
-				if(Math.floor(x)>=(60*i) && Math.floor(x)<(60*(i+1))) {
-					sec_d = Math.floor(x) - (60*i);
-					sec_d = sec_d <10 ? '0'+sec_d:sec_d;
-				}
-			}
-		}else{
-		 	sec_d = (isNaN(duration) === true)? '0':
-		 	Math.floor(x);
-		 	sec_d = sec_d <10 ? '0'+sec_d:sec_d;
-		 }
-	} 
-
-	// define seconds duration
-	
-	get_sec_d (duration);
-
-	// change duration DOM
-	durTime.innerHTML = min_d +":"+ sec_d;
+		if(size>maxSize)
+			size = maxSize;
+		else if(size<minSize)
+			size = minSize;
 		
-};
+		current.innerHTML = size;	
+	}
+	dec.addEventListener("click",decrease);
 
-// Event listeners
-playBtn.addEventListener('click', () => {
-  const isPlaying = musicContainer.classList.contains('play');
+	//change color
+	function colorChange(e)
+	{
+		var color = e.target;
+		context.fillStyle = color.style.backgroundColor;
+		context.strokeStyle = color.style.backgroundColor;
 
-  if (isPlaying) {
-    pauseSong();
-  } else {
-    playSong();
-  }
-});
+		var active = document.getElementsByClassName("active")[0];
+			console.log(color);
+		active.className = 'shade';
 
-// Change song
-prevBtn.addEventListener('click', prevSong);
-nextBtn.addEventListener('click', nextSong);
+		color.className += ' active';
+	}
 
-// Time/song update
-audio.addEventListener('timeupdate', updateProgress);
+	for(var i =0;i<shade.length;i++)
+	{
+		shade[i].addEventListener("click",colorChange);
+	}
+	var press = false;
 
-// Click on progress bar
-progressContainer.addEventListener('click', setProgress);
+	//draw line
+	function drawLine(e){
+		
+		if(press){
+		context.lineTo(e.clientX,e.clientY);
+		context.lineWidth = 2*size;
+		context.stroke();
 
-// Song ends
-audio.addEventListener('ended', nextSong);
+		context.beginPath();
+		console.log(e.clientX);
+		
+		context.arc(e.clientX,e.clientY,size,0,2*Math.PI);
 
-// Time of song
-audio.addEventListener('timeupdate',DurTime);
+		context.fill();
+		
+		context.beginPath();
+		console.log(e.clientX);
+		
+		context.moveTo(e.clientX,e.clientY);
+		}
+	}
+
+	function up(e){
+		press = false;
+		context.beginPath();
+	}
+
+	function down(e){
+		press = true;
+		drawLine(e);
+	}
+
+	canvas.addEventListener('mouseup',up);
+	canvas.addEventListener('mousedown',down);
+	canvas.addEventListener('mousemove',drawLine);
+
+	//erase
+	function erasescr(){
+
+		context.fillStyle = '#fff';
+		context.strokeStyle = '#fff';
+	}
+	erase.addEventListener("click",erasescr);
+
+	//clear
+	function clearscr(){
+		context.clearRect(0,0,window.innerWidth,window.innerHeight);
+	}
+	clear.addEventListener("click",clearscr);
+
+	//save
+	function saveFile(e){
+		e.target.href = canvas.toDataURL();
+		e.target.download = "drawing.png";
+	}
+
+	save.addEventListener("click",saveFile);
+})();
